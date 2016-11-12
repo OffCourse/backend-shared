@@ -30,8 +30,11 @@
     (str endpoint "/repos/" owner "/" name "/git/trees/" sha)))
 
 (defn handle-response [c res]
-  (async/put! c res)
-  (async/close! c))
+  (let [response (->> res
+                      to-js
+                      cv/to-clj)]
+    (async/put! c response)
+    (async/close! c)))
 
 (defn handle-content [res]
   (->> res
@@ -43,17 +46,6 @@
        js->clj
        walk/keywordize-keys))
 
-
-(defn handle-tree-res [res]
-  (->> res
-       to-js
-       cv/to-clj))
-
-(defn handle-tree [{:keys [tree user-name] :as res}]
-  (->> tree
-       (filterv yaml-file?)
-       (map #(assoc %1 :user-name user-name))))
-
 (defn -fetch [url]
   (let [c (async/chan)]
     (request (clj->js url) #(handle-response c %3))
@@ -63,18 +55,16 @@
 
 (defmethod fetch :github-courses [{:keys [endpoint] :as this} query]
   (go
-    (let [urls  (map :url query)
+    (let [urls        (map :url query)
           query-chans (async/merge (map #(-fetch %) urls))
-          res         (async/<! (async/into [] query-chans))
-          courses     (mapv handle-content res)]
-      {:found courses})))
+          merged-res  (async/<! (async/into [] query-chans))
+          res         (set/join merged-res query {:sha :sha})]
+      {:found res})))
 
 (defmethod fetch :github-repos [{:keys [endpoint] :as this} query]
   (go
     (let [urls        (map #(tree-url endpoint %) query)
           query-chans (async/merge (map #(-fetch %) urls))
-          res         (async/<! (async/into [] query-chans))
-          tree-res    (map handle-tree-res res)
-          joined-res  (set/join tree-res query {:sha :sha})
-          trees       (mapcat handle-tree joined-res)]
-      {:found trees})))
+          merged-res  (async/<! (async/into [] query-chans))
+          res         (set/join merged-res query {:sha :sha})]
+      {:found res})))

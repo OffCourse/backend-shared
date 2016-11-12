@@ -34,8 +34,7 @@
 (defmethod extract-record :kinesis [{:keys [kinesis]}]
   (-> kinesis :data convert-buffer))
 
-(defmulti to-payload (fn [aws-event]
-                       (sp/resolve aws-event)))
+(defmulti to-payload (fn [aws-event] (sp/resolve aws-event)))
 
 (defmethod to-payload :stream [aws-event]
   (->> aws-event
