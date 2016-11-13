@@ -29,13 +29,10 @@
   (->> res to-js
        cv/to-clj
        :hits :hits
-       (map :_source)))
+       (mapv :_source)))
 
 (defn fetch [{:keys [endpoint] :as this} index-name query]
   (go
-    (let [es-query (cv/to-es-query query)
-          res      (async/<! (-fetch index-name es-query))
+    (let [res      (async/<! (-fetch index-name query))
           items    (extract-items res)]
-      {:found (if (= (sp/resolve query) :course)
-                (first items)
-                items)})))
+      {:found items})))

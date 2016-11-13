@@ -1,13 +1,14 @@
 (ns backend-shared.convertible
   (:require [backend-shared.aws-event.index :as aws-event]
-            [backend-shared.to-es-query :refer [to-es-query]]
             [shared.models.payload.index :as payload]
             [shared.protocols.convertible :as cv :refer [Convertible]]
             [shared.protocols.specced :as sp]
             [backend-shared.s3.to-action :as s3]
             [backend-shared.dynamodb.index :as dynamodb]
+            [backend-shared.es.to-query :as es]
             [backend-shared.kinesis.to-action :as kinesis]
             [shared.models.action.index :as action]))
+
 
 (extend-protocol Convertible
   array
@@ -32,5 +33,5 @@
   (-to-json     [obj]           (->> obj clj->js (.stringify js/JSON)))
   PersistentArrayMap
   (-to-db       [obj]           (->  obj dynamodb/to-query))
-  (-to-json     [obj]           (->> obj clj->js (.stringify js/JSON)))
-  (-to-es-query [query]         (to-es-query query)))
+  (-to-search   [obj]           (->  obj es/to-query))
+  (-to-json     [obj]           (->> obj clj->js (.stringify js/JSON))))

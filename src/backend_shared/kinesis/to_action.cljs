@@ -11,6 +11,13 @@
 
 (defmulti to-action sp/resolve)
 
+(defmethod to-action [:put :error] [[action-type payload :as action]]
+  (let [stream-name (str (name (second (sp/resolve action))) "-" deployment-stage)
+        errors (map #(assoc (meta action) :data %1) action)]
+    (log/log "invalid action" (clj->js errors))
+    (action/create [action-type {:stream-name stream-name
+                                 :records errors}])))
+
 (defmethod to-action :default [[action-type payload :as action]]
   (let [stream-name (str (name (second (sp/resolve action))) "-" deployment-stage)]
     (action/create [action-type {:stream-name stream-name
