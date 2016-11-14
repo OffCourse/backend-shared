@@ -16,7 +16,8 @@
 
 (defn create []
   (specify! {:name "elasticsearch"
-             :endpoint endpoint}
+             :endpoint endpoint
+             :url endpoint-url}
     Queryable
     (-fetch [this index-name query]
       (fetch this index-name query))

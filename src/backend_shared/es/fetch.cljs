@@ -7,7 +7,6 @@
             [cuerdas.core :as str])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def endpoint-url (.. js/process -env -ELASTICSEARCH_ENDPOINT))
 (def ^:private js-request (node/require "request"))
 (defn to-js [obj] (.parse js/JSON obj))
 
@@ -20,19 +19,20 @@
                               #(async/close! c))))
     c))
 
-(defn -fetch [index-name query]
+(defn -fetch [endpoint-url index-name query]
   (go
     (<! (request {:url  (str endpoint-url "/offcourse/" index-name "/_search")
                   :body (.stringify js/JSON (clj->js query))}))))
 
 (defn extract-items [res]
-  (->> res to-js
+  (->> res
+       to-js
        cv/to-clj
        :hits :hits
        (mapv :_source)))
 
-(defn fetch [{:keys [endpoint] :as this} index-name query]
+(defn fetch [{:keys [url] :as this} index-name query]
   (go
-    (let [res      (async/<! (-fetch index-name query))
+    (let [res      (async/<! (-fetch url index-name query))
           items    (extract-items res)]
       {:found items})))

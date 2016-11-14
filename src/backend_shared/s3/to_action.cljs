@@ -1,7 +1,9 @@
 (ns backend-shared.s3.to-action
   (:require [cljs.nodejs :as node]
             [shared.protocols.convertible :as cv]
-            [shared.protocols.specced :as sp]))
+            [shared.protocols.specced :as sp]
+            [shared.protocols.loggable :as log]
+            [clojure.string :as str]))
 
 (def config (.config (node/require "dotenv")))
 (def service-name (.. js/process -env -SERVERLESS_SERVICE_NAME))
@@ -25,7 +27,7 @@
   (to-item (str user-name "/" sha) "github-courses" (cv/to-json course)))
 
 (defn to-resource-item [{:keys [url] :as resource}]
-  (let [key (str (-> url js/Buffer. (.toString "base64") (str "/embedly")))]
+  (let [key (str (-> url (str/replace #"[:&@/,<>`']" "-") (str "/embedly")))]
     (to-item key "resources" (cv/to-json resource))))
 
 (defn to-portrait-item [{:keys [user-name portrait-data]}]
