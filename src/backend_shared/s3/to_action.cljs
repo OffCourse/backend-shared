@@ -45,6 +45,9 @@
 (defmethod to-action [:put :courses] [[_ courses]]
   [:put (map to-course-item courses)])
 
+(defmethod to-action [:put :raw-users] [[_ users]]
+  [:put (map to-user-item users)])
+
 (defmethod to-action [:put :raw-portraits] [[_ portraits]]
   [:put (map to-portrait-item portraits)])
 
