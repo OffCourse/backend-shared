@@ -28,7 +28,6 @@
  '[adzerk.bootlaces      :refer :all]
  '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
  '[adzerk.boot-reload    :refer [reload]]
- '[crisptrutski.boot-cljs-test  :refer [exit! test-cljs]]
  '[codox.boot :refer [codox]]
  '[pandeiro.boot-http    :refer [serve]])
 
