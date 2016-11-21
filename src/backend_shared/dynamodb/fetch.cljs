@@ -3,8 +3,7 @@
   (:require [cljs.core.async :as async]
             [shared.models.payload.index :as payload]
             [shared.protocols.convertible :as cv]
-            [cljs.spec :as spec]
-            [shared.specs.core :as specs]))
+            [cljs.spec :as spec]))
 
 (defn create-query [{:keys [table-name item-key]}]
   (clj->js {:TableName table-name
@@ -36,12 +35,12 @@
                #(handle-batch-response c %1 %2 query table-name))
     c))
 
-(defmulti fetch (fn [_ query] (first (spec/conform ::specs/single-or-multiple? query))))
+#_(defmulti fetch (fn [_ query] nil))
 
-(defmethod fetch :single [table query]
+(defn fetch [table query]
   (let [c (async/chan)]
     (.get table (create-query query) #(handle-response c %1 %2 query))
     c))
 
-(defmethod fetch :multiple [table table-name query]
+#_(defmethod fetch :multiple [table table-name query]
   (batchGet table table-name query))

@@ -10,9 +10,9 @@
 (def ^:private js-request (node/require "request"))
 (defn to-js [obj] (.parse js/JSON obj))
 
-(defn request [url-or-opts]
-  (let [c (async/chan 1)]
-    (js-request (clj->js url-or-opts)
+(defn request [config]
+  (let [c (async/chan)]
+    (js-request (clj->js config)
                 (fn [error response body]
                   (async/put! c
                               (if error {:error error} body)
@@ -21,8 +21,10 @@
 
 (defn -fetch [endpoint-url index-name query]
   (go
-    (<! (request {:url  (str endpoint-url "/offcourse/" index-name "/_search")
-                  :body (.stringify js/JSON (clj->js query))}))))
+    (if endpoint-url
+      (<! (request {:url  (str endpoint-url "/offcourse/" index-name "/_search")
+                    :body (.stringify js/JSON (clj->js query))}))
+      {:error "elasticsearch endpoint needs to be set in the environment"})))
 
 (defn extract-items [res]
   (->> res
@@ -33,6 +35,7 @@
 
 (defn fetch [{:keys [url] :as this} index-name query]
   (go
-    (let [res      (async/<! (-fetch url index-name query))
-          items    (extract-items res)]
-      {:found items})))
+    (let [{:keys [error] :as res}      (async/<! (-fetch url index-name query))
+          items                        (when-not error (extract-items res))]
+      {:error error
+       :found items})))

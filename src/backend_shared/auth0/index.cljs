@@ -11,6 +11,6 @@
 
 (defn create []
   (specify {:name "auth0"
-            :secret (js/Buffer. api-secret "base64")}
+            :secret api-secret}
     Actionable
     (-perform [this credentials] (perform this credentials))))

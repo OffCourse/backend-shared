@@ -9,7 +9,6 @@
             [backend-shared.kinesis.to-action :as kinesis]
             [shared.models.action.index :as action]))
 
-
 (extend-protocol Convertible
   array
   (-to-clj [js-arr]             (js->clj js-arr :keywordize-keys true))
