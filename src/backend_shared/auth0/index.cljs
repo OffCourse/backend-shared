@@ -3,11 +3,11 @@
             [cljs.nodejs :as node]
             [cljs.core.async :as async]
             [backend-shared.auth0.perform :refer [perform]]
-            [shared.protocols.convertible :as cv])
+            [shared.protocols.convertible :as cv]
+            [shared.protocols.loggable :as log])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def config (.config (node/require "dotenv")))
-(def api-secret (.. js/process -env -AUTH0_SECRET))
+(def api-secret (.. js/process -env -authSecret))
 
 (defn create []
   (specify {:name "auth0"

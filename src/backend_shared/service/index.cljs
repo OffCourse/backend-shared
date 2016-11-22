@@ -59,9 +59,8 @@
   (map->Service (merge config
                        {:stage stage
                         :context (cv/to-clj context)
-                        :event (aws-event/create event)
-                        :query (cv/to-query event)}
-                       (initialize-adapters adapters))))
+                        :event   (aws-event/create event)}
+                        (initialize-adapters adapters))))
 
 (defn create [name cb adapter-names mappings specs]
   (do

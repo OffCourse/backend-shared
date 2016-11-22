@@ -15,7 +15,7 @@
     (js-request (clj->js config)
                 (fn [error response body]
                   (async/put! c
-                              (if error {:error error} body)
+                              (if error {:error :invalid-request} body)
                               #(async/close! c))))
     c))
 

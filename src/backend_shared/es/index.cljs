@@ -9,8 +9,7 @@
 (def AWS (node/require "aws-sdk"))
 (def path (node/require "path"))
 
-(def config (.config (node/require "dotenv")))
-(def endpoint-url (.. js/process -env -ELASTICSEARCH_ENDPOINT))
+(def endpoint-url (.. js/process -env -elasticsearchEndpoint))
 
 (def endpoint (when endpoint-url (AWS.Endpoint. endpoint-url)))
 
@@ -19,6 +18,7 @@
              :endpoint endpoint
              :url endpoint-url}
     Queryable
+
     (-fetch [this index-name query]
       (fetch this index-name query))
     Actionable

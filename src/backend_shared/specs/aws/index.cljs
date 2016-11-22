@@ -1,7 +1,9 @@
 (ns backend-shared.specs.aws.index
-  (:require [cljs.spec :as spec]))
+  (:require [cljs.spec :as spec]
+            [backend-shared.specs.aws.api :as api]
+            [backend-shared.specs.aws.auth :as auth]))
 
-(spec/def ::type string?)
-(spec/def :aws/methodArn string?)
-(spec/def :aws/authorizationToken string?)
-(spec/def :aws/auth-event (spec/keys :req-un [::type :aws/methodArn :aws/authorizationToken]))
+(spec/def :aws/credentials ::auth/credentials)
+(spec/def :aws/policy      ::auth/policy)
+(spec/def :aws/event       (spec/or :auth ::auth/event
+                                    :api  ::api/event))

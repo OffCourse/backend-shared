@@ -9,11 +9,14 @@
                                  :Effect effect
                                  :Resource methodArn}]}})
 
+(defn create-policy [{:keys [offcourse-id auth-id method-arn]}]
+  (cond
+    (and offcourse-id auth-id) (template (str "offcourse|" offcourse-id) "Allow" method-arn)
+    auth-id (template  auth-id "Allow" method-arn)
+    :default (template "hacker ;-)" "Deny" method-arn)))
+
 (defn create []
   (specify {}
     Actionable
-    (-perform [this [_ {:keys [offcourse-id auth-id methodArn]}]]
-      (cond
-        (and offcourse-id auth-id) (template (str "offcourse|" offcourse-id) "Allow" methodArn)
-        auth-id (template  auth-id "Allow" methodArn)
-        :default (template "hacker ;-)" "Deny" methodArn)))))
+    (-perform [this [_ credentials]]
+      {:policy (create-policy credentials)})))

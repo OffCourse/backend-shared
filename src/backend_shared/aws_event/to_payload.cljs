@@ -36,6 +36,10 @@
 
 (defmulti to-payload (fn [aws-event] (sp/resolve aws-event)))
 
+(defmethod to-payload :auth [{:keys [methodArn authorizationToken]}]
+  {:auth-token authorizationToken
+   :method-arn methodArn})
+
 (defmethod to-payload :stream [aws-event]
   (->> aws-event
        :Records

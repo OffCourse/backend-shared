@@ -19,14 +19,16 @@
   (let [[event-type event] (extract-event record)]
     (update acc event-type conj event)))
 
+(defrecord AwsEvent []
+  Convertible
+  (-to-credentials [this] (to-credentials this))
+  (-to-query [this] (to-query this))
+  (-to-action [this] (to-action this))
+  (-to-events [{:keys [Records] :as this}] (reduce group-db-event {} Records))
+  (-to-payload [this] (to-payload this)))
+
 (defn create [raw-event]
   (-> raw-event
       cv/to-clj
-      (with-meta {:spec ::specs/aws-event})
-      (specify Convertible
-        (-to-credentials [this] (to-credentials this))
-        (-to-query [this] (to-query this))
-        (-to-action [this] (to-action this))
-        (-to-events [{:keys [Records] :as this}] (->> Records
-                                                      (reduce group-db-event {})))
-        (-to-payload [this] (to-payload this)))))
+      map->AwsEvent
+      (with-meta {:spec :aws/event})))

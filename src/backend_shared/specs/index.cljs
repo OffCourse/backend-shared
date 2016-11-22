@@ -6,4 +6,3 @@
 
 (spec/def :offcourse/action :action/valid)
 (spec/def :offcourse/query  :query/backend)
-(spec/def :auth/aws         :aws/auth-event)

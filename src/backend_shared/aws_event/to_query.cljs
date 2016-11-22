@@ -34,3 +34,6 @@
        (map extract-record)
        flatten
        query/create))
+
+(defmethod to-query :auth [{:keys [auth-id]}]
+  {:auth-id auth-id})
