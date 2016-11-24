@@ -18,8 +18,6 @@
              :endpoint endpoint
              :url endpoint-url}
     Queryable
-
-    (-fetch [this index-name query]
-      (fetch this index-name query))
+    (-fetch [this index-name query] (fetch this index-name query))
     Actionable
     (-perform [this index-name action] (perform this index-name action))))

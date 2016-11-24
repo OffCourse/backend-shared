@@ -14,16 +14,19 @@
 (defn to-js [obj]
   (.parse js/JSON obj))
 
-(def config (.config (node/require "dotenv")))
-
-(def api-key (.. js/process -env -GITHUB_API_KEY))
+(def api-key (.. js/process -env -githubApiKey))
 
 (def atob (node/require "atob"))
 (def yaml (node/require "js-yaml"))
 (def -request (node/require "request"))
+
+(def authorized-header {:headers {:user-agent    "offcourse"
+                                  :authorization (str "token " api-key)}})
+
+(def unauthorized-header {:headers {:user-agent    "offcourse"}})
+
 (def request (.defaults -request
-                        (clj->js {:headers {:user-agent    "offcourse"
-                                            :Authorization (str "token " api-key)}})))
+                        (clj->js (if api-key authorized-header unauthorized-header))))
 
 (defn tree-url [endpoint repository]
   (let [{:keys [owner name sha]} repository]

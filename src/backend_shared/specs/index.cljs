@@ -2,7 +2,9 @@
   (:require [cljs.spec :as spec]
             [shared.specs.index]
             [backend-shared.specs.query]
-            [backend-shared.specs.aws.index]))
+            [backend-shared.specs.aws.index]
+            [backend-shared.specs.github]
+            [backend-shared.specs.embedly]))
 
 (spec/def :offcourse/action :action/valid)
 (spec/def :offcourse/query  :query/backend)

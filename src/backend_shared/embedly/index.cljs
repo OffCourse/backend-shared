@@ -1,10 +1,9 @@
 (ns backend-shared.embedly.index
   (:require [shared.protocols.queryable :refer [Queryable]]
             [backend-shared.embedly.fetch :refer [fetch]]
-            [cljs.nodejs :as node]))
+            [shared.protocols.loggable :as log]))
 
-(def config (.config (node/require "dotenv")))
-(def api-key (.. js/process -env -EMBEDLY_API_KEY))
+(def api-key (.. js/process -env -embedlyApiKey))
 
 (defn create []
   (specify {:api-key api-key
