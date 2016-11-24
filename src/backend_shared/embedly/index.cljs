@@ -6,7 +6,7 @@
 (def api-key (.. js/process -env -embedlyApiKey))
 
 (defn create []
-  (specify {:api-key api-key
+  (specify {:api-key (js->clj api-key)
             :api-version "1"
             :endpoint "http://api.embed.ly"}
     Queryable

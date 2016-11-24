@@ -1,6 +1,5 @@
 (ns backend-shared.aws-event.to-payload
   (:require [cljs.spec :as spec]
-            [shared.specs.aws :as aws-specs]
             [shared.models.payload.index :as payload]
             [shared.protocols.convertible :as cv]
             [shared.protocols.specced :as sp]
@@ -18,7 +17,7 @@
 
 (defmulti extract-record
   (fn [record]
-    (first (spec/conform ::aws-specs/record record))))
+    (first (spec/conform :aws/record record))))
 
 (defn extract-image [image]
   (some-> image clj->js unmarshal-item cv/to-clj))

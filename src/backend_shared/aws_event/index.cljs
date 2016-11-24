@@ -1,6 +1,5 @@
 (ns backend-shared.aws-event.index
   (:require [shared.protocols.convertible :as cv :refer [Convertible]]
-            [shared.specs.aws :as specs]
             [backend-shared.aws-event.to-query :refer [to-query]]
             [backend-shared.aws-event.to-action :refer [to-action]]
             [backend-shared.aws-event.to-credentials :refer [to-credentials]]

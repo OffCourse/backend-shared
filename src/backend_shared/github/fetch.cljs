@@ -32,12 +32,14 @@
   (let [{:keys [owner name sha]} repository]
     (str endpoint "/repos/" owner "/" name "/git/trees/" sha)))
 
-(defn handle-response [c res]
-  (let [response (->> res
-                      to-js
-                      cv/to-clj)]
-    (async/put! c response)
-    (async/close! c)))
+
+(defn handle-response [c res body error]
+  (let [statusCode (aget res "statusCode")
+        response (-> body to-js cv/to-clj)]
+    (if (< statusCode 400)
+      (async/put! c response)
+      (async/put! c {:error response}))
+  (async/close! c)))
 
 (defn handle-content [res]
   (->> res
@@ -51,7 +53,7 @@
 
 (defn -fetch [url]
   (let [c (async/chan)]
-    (request (clj->js url) #(handle-response c %3))
+    (request (clj->js url) #(handle-response c %2 %3 %1))
     c))
 
 (defmulti fetch (fn [_ query] (sp/resolve query)))
@@ -69,5 +71,7 @@
     (let [urls        (map #(tree-url endpoint %) query)
           query-chans (async/merge (map #(-fetch %) urls))
           merged-res  (async/<! (async/into [] query-chans))
+          errors      (filter (fn [{:keys [error]}] error) merged-res)
           res         (set/join merged-res query {:sha :sha})]
-      {:found res})))
+      {:found res
+       :errors errors})))

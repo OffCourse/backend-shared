@@ -13,7 +13,7 @@
 
 (defmulti extract-record
   (fn [record]
-    (first (spec/conform ::aws-specs/record record))))
+    (first (spec/conform :aws/record record))))
 
 (defmethod extract-record :s3 [{:keys [s3]}]
   {:item-key (-> s3 :object :key)

@@ -9,6 +9,6 @@
                                  :dynamodb (spec/keys :req-un [::dynamodb])
                                  :s3 (spec/keys :req-un [::s3])))
 
-(spec/def ::Records (spec/* ::record))
+(spec/def ::Records (spec/coll-of ::record))
 
 (spec/def ::event (spec/keys :req-un [::Records]))

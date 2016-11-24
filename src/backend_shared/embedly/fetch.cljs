@@ -24,7 +24,9 @@
     (async/close! channel)))
 
 (defn fetch [{:keys [endpoint api-version api-key] :as this} urls]
-  (let [c (async/chan)
-        url (create-url endpoint api-version api-key urls)
-        res (request url #(handle-response c %1 %2 %3))]
-    c))
+  (if (= api-key "undefined")
+    (go {:error "embedly api-key needs to be set in the environment"})
+    (let [c (async/chan)
+          url (create-url endpoint api-version api-key urls)
+          res (request url #(handle-response c %1 %2 %3))]
+      c)))

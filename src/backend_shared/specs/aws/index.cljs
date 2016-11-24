@@ -6,6 +6,7 @@
 
 (spec/def :aws/credentials ::auth/credentials)
 (spec/def :aws/policy      ::auth/policy)
+(spec/def :aws/record      ::stream/record)
 (spec/def :aws/event       (spec/or :auth   ::auth/event
                                     :stream ::stream/event
                                     :api    ::api/event))

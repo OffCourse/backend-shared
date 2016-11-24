@@ -7,7 +7,8 @@
             [backend-shared.dynamodb.index :as dynamodb]
             [backend-shared.es.to-query :as es]
             [backend-shared.kinesis.to-action :as kinesis]
-            [shared.models.action.index :as action]))
+            [shared.models.action.index :as action]
+            [shared.protocols.loggable :as log]))
 
 (extend-protocol Convertible
   array
