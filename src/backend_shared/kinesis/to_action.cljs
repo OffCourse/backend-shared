@@ -1,17 +1,15 @@
 (ns backend-shared.kinesis.to-action
-  (:require [cljs.nodejs :as node]
-            [shared.protocols.specced :as sp]
+  (:require [shared.protocols.specced :as sp]
             [clojure.walk :as walk]
             [shared.models.action.index :as action]
-            [shared.protocols.loggable :as log]))
+            [shared.protocols.loggable :as log])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def config (.config (node/require "dotenv")))
-(def service-name (.. js/process -env -SERVERLESS_SERVICE_NAME))
-(def deployment-stage (.. js/process -env -SERVERLESS_STAGE))
+(def deployment-stage (.. js/process -env -serverlessStage))
 
 (defmulti to-action sp/resolve)
 
-(defmethod to-action [:put :error] [[action-type payload :as action]]
+(defmethod to-action [:put :errors] [[action-type payload :as action]]
   (let [stream-name (str (name (second (sp/resolve action))) "-" deployment-stage)
         errors (map #(assoc (meta action) :data %1) action)]
     (log/log "invalid action" (clj->js errors))

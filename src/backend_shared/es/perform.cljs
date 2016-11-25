@@ -2,7 +2,8 @@
   (:require [cljs.core.async :as async]
             [clojure.walk :as walk]
             [shared.protocols.loggable :as log]
-            [cljs.nodejs :as node])
+            [cljs.nodejs :as node]
+            [shared.protocols.convertible :as cv])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def AWS (node/require "aws-sdk"))
@@ -26,8 +27,13 @@
   (let [item (atom "")]
     (.on resp "data" #(swap! item str %1))
     (.on resp "end" #(do
-                       (async/put! c @item)
-                       (async/close! c)))))
+                       (let [js-item (.parse js/JSON @item)
+                             {:keys [message] :as res} (cv/to-clj js-item)]
+                         (if message
+                           (async/put! c {:error message})
+                           (async/put! c res))
+                         (async/close! c))))))
+
 (defn -save [req]
   (let [c (async/chan)]
     (.handleRequest HTTP req nil #(handle-response %1 c))
@@ -35,7 +41,10 @@
 
 (defn perform [{:keys [endpoint] :as this} index-name [_ payload]]
   (go
-    (let [queries (map #(create-request endpoint index-name %1) payload)
+    (let [queries     (map #(create-request endpoint index-name %1) payload)
           query-chans (async/merge (map #(-save %) queries))
-          res         (async/<! (async/into [] query-chans))]
-        {:success res})))
+          merged-res  (async/<! (async/into [] query-chans))
+          errors      (filter (fn [{:keys [error]}] error) merged-res)
+          success       (remove (fn [{:keys [error]}] error) merged-res)]
+      {:saved success
+       :errors errors})))

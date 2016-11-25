@@ -31,6 +31,11 @@
    :Key item-key})
 
 (defn fetch [bucket query]
-  (let [queries (map #(create-query %1) query)
-        query-chans (async/merge (map #(-get bucket %1) queries))]
-    (async/into [] query-chans)))
+  (go
+    (let [queries (map #(create-query %1) query)
+          query-chans (async/merge (map #(-get bucket %1) queries))
+          merged-res  (async/<! (async/into [] query-chans))
+          errors      (filter (fn [{:keys [error]}] error) merged-res)
+          found       (remove (fn [{:keys [error]}] error) merged-res)]
+      {:found found
+       :errors errors})))
