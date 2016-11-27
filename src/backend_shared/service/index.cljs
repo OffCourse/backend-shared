@@ -85,6 +85,5 @@
 (defn done [{:keys [callback]} payload] (callback nil (clj->js payload)))
 (defn fail [{:keys [callback]} error] (callback (clj->js error)) nil)
 
-
 (def fetch fetch/fetch)
 (def perform perform/perform)

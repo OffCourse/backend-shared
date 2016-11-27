@@ -1,15 +1,12 @@
 (ns backend-shared.aws-event.to-query
   (:require [cljs.spec :as spec]
-            [shared.specs.aws :as aws-specs]
             [shared.models.query.index :as query]
             [shared.protocols.convertible :as cv]
             [shared.protocols.specced :as sp]
             [shared.protocols.loggable :as log]))
 
 (defn convert-buffer [data]
-  (-> js/JSON
-      (.parse (.toString (js/Buffer. data "base64") "ascii"))
-      cv/to-clj))
+  (cv/to-clj (.toString (js/Buffer. data "base64") "ascii")))
 
 (defmulti extract-record
   (fn [record]
@@ -22,14 +19,13 @@
 (defmethod extract-record :kinesis [{:keys [kinesis]}]
   (-> kinesis :data convert-buffer))
 
-(defmulti to-query (fn [aws-event]
-                     (sp/resolve aws-event)))
+(defmulti to-query (fn [event] (sp/resolve event)))
 
-(defmethod to-query :api [aws-event]
-  (-> aws-event :body query/create))
+(defmethod to-query :api [event]
+  (-> event :body query/create))
 
-(defmethod to-query :stream [aws-event]
-  (->> aws-event
+(defmethod to-query :stream [event]
+  (->> event
        :Records
        (map extract-record)
        flatten

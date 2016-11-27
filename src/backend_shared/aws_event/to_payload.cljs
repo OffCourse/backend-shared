@@ -11,9 +11,7 @@
 (def unmarshal-item (.-unmarshalItem marshaler))
 
 (defn convert-buffer [data]
-  (-> js/JSON
-      (.parse (.toString (js/Buffer. data "base64") "ascii"))
-      cv/to-clj))
+  (cv/to-clj (.toString (js/Buffer. data "base64") "ascii")))
 
 (defmulti extract-record
   (fn [record]

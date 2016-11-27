@@ -7,8 +7,6 @@
            [shared.protocols.convertible :as cv])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(defn to-js [obj] (.parse js/JSON obj))
-
 (def request (node/require "request"))
 
 (defn create-url [endpoint api-version api-key urls]
@@ -16,7 +14,7 @@
 
 (defn handle-response [channel error res data]
   (let [status-code                    (aget res "statusCode")
-        {:keys [error_code] :as body} (->> data to-js cv/to-clj)
+        {:keys [error_code] :as body} (cv/to-clj data)
         error                         (when (or error error_code (>= status-code 400)) res)
         data                          (when-not error (map #(-> % cv/to-clj) body))]
     (async/put! channel {:error (when error error)

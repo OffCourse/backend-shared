@@ -20,6 +20,8 @@
   (-to-payload [raw-event]      (-> raw-event aws-event/create cv/to-payload))
   (-to-action [raw-event]       (-> raw-event aws-event/create cv/to-action))
   (-to-query [raw-event]        (-> raw-event aws-event/create cv/to-query))
+  string
+  (-to-clj [string] (->> string (.parse js/JSON) cv/to-clj))
 
   ;; This should be Action (still have to create a proper type for this...)
   PersistentVector
