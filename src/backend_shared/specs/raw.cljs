@@ -7,4 +7,5 @@
 (spec/def ::user        (spec/keys :req-un [:base/user-name :auth/auth-profile]))
 
 (spec/def :raw/course ::course)
+
 (spec/def :raw/user ::user)
