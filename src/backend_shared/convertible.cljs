@@ -3,10 +3,10 @@
             [shared.models.payload.index :as payload]
             [shared.protocols.convertible :as cv :refer [Convertible]]
             [shared.protocols.specced :as sp]
-            [backend-shared.s3.to-action :as s3]
-            [backend-shared.dynamodb.index :as dynamodb]
-            [backend-shared.es.to-query :as es]
-            [backend-shared.kinesis.to-action :as kinesis]
+            [backend-shared.adapters.s3.to-action :as s3]
+            [backend-shared.adapters.dynamodb.index :as dynamodb]
+            [backend-shared.adapters.es.to-query :as es]
+            [backend-shared.adapters.kinesis.to-action :as kinesis]
             [shared.models.action.index :as action]
             [shared.protocols.loggable :as log]))
 
@@ -21,7 +21,7 @@
   (-to-action [raw-event]       (-> raw-event aws-event/create cv/to-action))
   (-to-query [raw-event]        (-> raw-event aws-event/create cv/to-query))
   string
-  (-to-clj [string] (->> string (.parse js/JSON) cv/to-clj))
+  (-to-clj [string]             (->> string (.parse js/JSON) cv/to-clj))
 
   ;; This should be Action (still have to create a proper type for this...)
   PersistentVector
