@@ -1,4 +1,4 @@
-(ns backend-shared.loggable
+(ns backend-shared.protocol-extensions.loggable
   (:require [shared.protocols.loggable :as log :refer [Loggable]]))
 
 (extend-protocol Loggable

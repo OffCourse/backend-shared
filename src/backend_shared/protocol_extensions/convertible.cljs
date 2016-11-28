@@ -1,4 +1,4 @@
-(ns backend-shared.convertible
+(ns backend-shared.protocol_extensions.convertible
   (:require [shared.protocols.convertible :as cv :refer [Convertible]]))
 
 (extend-protocol Convertible

@@ -15,8 +15,7 @@
   Actionable
   (-perform [service payload] (perform/perform service payload))
   Queryable
-  (-fetch [service query]
-    (fetch/fetch service query)))
+  (-fetch [service query] (fetch/fetch service query)))
 
 (defn initialize-adapters [adapter-names]
   (reduce (fn [acc val] (assoc acc val ((val adapters/constructors))))
@@ -65,6 +64,3 @@
 
 (defn done [{:keys [callback]} payload] (callback nil (clj->js payload)))
 (defn fail [{:keys [callback]} error] (callback (clj->js error)) nil)
-
-(def fetch fetch/fetch)
-(def perform perform/perform)
