@@ -11,7 +11,7 @@
   (-to-credentials [this] (to-credentials this))
   (-to-query [this]       (to-query this))
   (-to-action [this]      (to-action this))
-  (-to-events [this]      (to-db-events this))
+  (-to-db-events [this]      (to-db-events this))
   (-to-payload [this]     (to-payload this)))
 
 (defn create [raw-event]

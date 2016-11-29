@@ -1,6 +1,6 @@
 (ns backend-shared.service.index
   (:require [backend-shared.aws-event.index :as aws-event]
-            [backend-shared.adapters.index :as adapters]
+            [backend-adapters.index :as adapters]
             [backend-shared.service.fetch :as fetch]
             [backend-shared.service.perform :as perform]
             [shared.protocols.actionable :refer [Actionable]]
@@ -8,8 +8,7 @@
             [shared.protocols.loggable :as log]
             [shared.protocols.queryable :refer [Queryable]]))
 
-
-(def stage (.. js/process -env -SERVERLESS_STAGE))
+(def stage (.. js/process -env -serverlessStage))
 
 (defrecord Service []
   Actionable
@@ -17,8 +16,8 @@
   Queryable
   (-fetch [service query] (fetch/fetch service query)))
 
-(defn initialize-adapters [adapter-names]
-  (reduce (fn [acc val] (assoc acc val ((val adapters/constructors))))
+(defn initialize-adapters [adapter-names stage]
+  (reduce (fn [acc val] (assoc acc val ((val adapters/constructors) stage)))
           {} adapter-names))
 
 (defn log-incoming [event context]
@@ -40,7 +39,7 @@
                        {:stage stage
                         :context (cv/to-clj context)
                         :event   (aws-event/create event)}
-                        (initialize-adapters adapters))))
+                        (initialize-adapters adapters stage))))
 
 (defn create [name cb adapter-names mappings specs]
   (do
@@ -49,7 +48,7 @@
     (map->Service (merge {:service-name name
                           :stage        stage
                           :callback     cb}
-                         (initialize-adapters adapter-names)))))
+                         (initialize-adapters adapter-names stage)))))
 
 
 (defn res [code body] {:statusCode code
@@ -64,3 +63,6 @@
 
 (defn done [{:keys [callback]} payload] (callback nil (clj->js payload)))
 (defn fail [{:keys [callback]} error] (callback (clj->js error)) nil)
+
+(def fetch fetch/fetch)
+(def perform perform/perform)
