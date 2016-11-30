@@ -13,8 +13,8 @@
       replaceEmptyStrings
       clj->js))
 
-(defn create-query [{:keys [table-name item]} stage]
-  {:TableName (str table-name "-" stage)
+(defn create-query [{:keys [table-name item]}]
+  {:TableName table-name
    :Item (marshal item)})
 
 (defn -save [{:keys [action] :as adapter} query]
@@ -31,9 +31,9 @@
              (async/close! c)))
     c))
 
-(defn perform [{:keys [stage] :as this} [_ payload]]
+(defn perform [this [_ payload]]
   (go
-    (let [queries (map #(create-query %1 stage) payload)
+    (let [queries (map #(create-query %1) payload)
           query-chans (async/merge (map #(-save this %) queries))
           res         (async/<! (async/into [] query-chans))
           errors      (filter (fn [[result data]] (= :error result)) res)]

@@ -6,7 +6,7 @@
             [cljs.spec :as spec]
             [shared.protocols.loggable :as log]))
 
-(defn create-query [{:keys [table-name item-key]} stage]
+(defn create-query [{:keys [item-key table-name]}]
   (clj->js {:TableName table-name
             :Key       item-key}))
 
@@ -38,5 +38,5 @@
 
 (defn fetch [{:keys [action stage] :as adapter} query]
   (let [c (async/chan)]
-    (.get action (create-query query stage) #(handle-response c %1 %2 query))
+    (.get action (create-query query) #(handle-response c %1 %2 query))
     c))

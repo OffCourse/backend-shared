@@ -20,4 +20,4 @@
 ;; This should be Action (still have to create a proper type for this...)
 (extend-protocol Convertible
   PersistentVector
-  (-to-bucket   [obj] (->  obj action/create s3/to-action)))
+  (-to-bucket   [obj bucket-name] (->  obj action/create (s3/to-action bucket-name))))
