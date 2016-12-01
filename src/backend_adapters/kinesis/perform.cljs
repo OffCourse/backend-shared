@@ -3,15 +3,10 @@
             [cljs.nodejs :as node]
             [shared.protocols.loggable :as log]
             [shared.specs.helpers :as sh]
-            [shared.protocols.specced :as sp])
+            [shared.protocols.specced :as sp]
+            [shared.protocols.convertible :as cv]
+            [shared.models.payload.index :as payload])
   (:require-macros [cljs.core.async.macros :refer [go]]))
-
-(def AWS (node/require "aws-sdk"))
-(def kinesis (new AWS.Kinesis))
-
-(defn create-record [item]
-  {:Data (.stringify js/JSON (clj->js item))
-   :PartitionKey (str (rand-int 1000))})
 
 (defn response-params [error data channel query]
   {:error error
@@ -28,16 +23,13 @@
     (async/put! channel {:accepted (js->clj data :keywordize-keys true)}))
   (async/close! channel))
 
-(defn -send [message]
+(defn -send [{:keys [instance]} message]
   (let [c (async/chan)]
-    (.putRecords kinesis (clj->js message)
+    (.putRecords instance (clj->js message)
                  #(handle-response (response-params %1 %2 c message)))
     c))
 
-(defn create [stream-name items]
-  {:StreamName stream-name
-   :Records (map create-record items)})
-
-(defn perform [stream [_ {:keys [stream-name records]}]]
-  (let [message (create stream-name records)]
-    (-send message)))
+(defn perform [{:keys [stream-names] :as adapter} [_ payload]]
+  (let [payload (payload/create (into [] payload))
+        message (cv/to-stream payload stream-names)]
+    (-send adapter message)))

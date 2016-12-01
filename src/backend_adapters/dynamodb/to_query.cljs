@@ -4,8 +4,8 @@
             [shared.models.query.index :as query]
             [shared.protocols.loggable :as log]))
 
-(defmulti to-query sp/resolve)
-
-(defmethod to-query :identity [query table-name]
-  (query/create {:table-name table-name
-                 :item-key (select-keys query [:auth-id])}))
+(defn to-query [query table-names]
+  (let [query-type (sp/resolve query)
+        table-name (query-type table-names)]
+    (query/create {:TableName table-name
+                   :Key (select-keys query [:auth-id])})))

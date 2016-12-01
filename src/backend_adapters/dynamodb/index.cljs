@@ -13,9 +13,9 @@
 
 (def AWS (node/require "aws-sdk"))
 
-(defn create [{:keys [stage]}]
+(defn create [{:keys [table-names]}]
   (specify {:action (AWS.DynamoDB.DocumentClient.)
-            :stage  stage}
+            :table-names  table-names}
     Queryable
     (-fetch [table query] (fetch table query))
     Actionable
@@ -24,9 +24,9 @@
 (extend-protocol Convertible
   ;; This should be Action (still have to create a proper type for this...)
   PersistentVector
-  (-to-db       [obj table-name] (->  obj action/create (to-action table-name)))
+  (-to-db       [obj table-names] (->  obj action/create (to-action table-names)))
   ;; These should both be Query (still have to create a proper type for this...)
   PersistentHashMap
-  (-to-db       [obj table-name] (to-query obj table-name))
+  (-to-db       [obj table-names] (to-query obj table-names))
   PersistentArrayMap
-  (-to-db       [obj table-name] (to-query obj table-name)))
+  (-to-db       [obj table-names] (to-query obj table-names)))

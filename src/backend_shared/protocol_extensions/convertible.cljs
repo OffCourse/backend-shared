@@ -2,6 +2,8 @@
   (:require [shared.protocols.convertible :as cv :refer [Convertible]]))
 
 (extend-protocol Convertible
+  nil
+  (-to-clj [_]                  nil)
   array
   (-to-clj [js-arr]             (js->clj js-arr :keywordize-keys true))
   object

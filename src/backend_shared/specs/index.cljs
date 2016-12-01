@@ -8,5 +8,6 @@
             [backend-shared.specs.embedly]))
 
 (spec/def :offcourse/action :action/valid)
-
 (spec/def :offcourse/query  :query/backend)
+
+

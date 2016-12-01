@@ -14,9 +14,9 @@
       convert-payload
       cv/to-clj))
 
-(defn- -get [bucket query]
+(defn- -get [{:keys [instance]} query]
   (let [c (async/chan)]
-    (.getObject bucket (clj->js query)
+    (.getObject instance (clj->js query)
                 #(let [response (if %1
                                   {:error %1}
                                   (to-payload %2))]
@@ -30,10 +30,10 @@
   {:Bucket bucket-name
    :Key item-key})
 
-(defn fetch [bucket query]
+(defn fetch [{:keys [bucket-names] :as adapter} query]
   (go
     (let [queries (map #(create-query %1) query)
-          query-chans (async/merge (map #(-get bucket %1) queries))
+          query-chans (async/merge (map #(-get adapter %1) queries))
           merged-res  (async/<! (async/into [] query-chans))
           errors      (filter (fn [{:keys [error]}] error) merged-res)
           found       (remove (fn [{:keys [error]}] error) merged-res)]

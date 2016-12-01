@@ -1,20 +1,19 @@
 (ns backend-adapters.kinesis.index
   (:require [backend-adapters.kinesis.perform :refer [perform]]
-            [backend-adapters.kinesis.to-action :as kinesis]
-            [shared.protocols.convertible :as cv :refer [Convertible]]
-            [shared.models.action.index :as action]
-            [shared.protocols.actionable :refer [Actionable]]
+            [backend-adapters.kinesis.to-payload :refer [to-payload]]
             [cljs.nodejs :as node]
-            [shared.protocols.loggable :as log]))
+            [shared.protocols.actionable :refer [Actionable]]
+            [shared.protocols.convertible :as cv :refer [Convertible]]))
 
 (def AWS (node/require "aws-sdk"))
 
-(defn create [stage]
-  (specify! (new AWS.Kinesis)
+(defn create [{:keys [stream-names] :as config}]
+  (specify! {:instance (new AWS.Kinesis)
+             :stream-names stream-names}
     Actionable
     (-perform [this action] (perform this action))))
 
 (extend-protocol Convertible
-  ;; This should be Action (still have to create a proper type for this...)
+  ;; This should be payload (still have to create a proper type for this...)
   PersistentVector
-  (-to-stream   [obj] (->  obj action/create kinesis/to-action)))
+  (-to-stream [records stream-names] (to-payload records stream-names)))

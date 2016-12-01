@@ -1,21 +1,7 @@
 (ns backend-adapters.dynamodb.perform
   (:require [cljs.core.async :as async]
-            [clojure.walk :as walk]
             [shared.protocols.loggable :as log])
   (:require-macros [cljs.core.async.macros :refer [go]]))
-
-
-(defn replaceEmptyStrings [obj]
-  (walk/postwalk-replace {"" nil} obj))
-
-(defn marshal [item]
-  (-> item
-      replaceEmptyStrings
-      clj->js))
-
-(defn create-query [{:keys [table-name item]}]
-  {:TableName table-name
-   :Item (marshal item)})
 
 (defn -save [{:keys [action] :as adapter} query]
   (let [c (async/chan)]
@@ -31,10 +17,9 @@
              (async/close! c)))
     c))
 
-(defn perform [this [_ payload]]
+(defn perform [{:keys [table-names] :as this} [_ queries]]
   (go
-    (let [queries (map #(create-query %1) payload)
-          query-chans (async/merge (map #(-save this %) queries))
+    (let [query-chans (async/merge (map #(-save this %) queries))
           res         (async/<! (async/into [] query-chans))
           errors      (filter (fn [[result data]] (= :error result)) res)]
       (if (empty? errors)

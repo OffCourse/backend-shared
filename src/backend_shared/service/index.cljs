@@ -10,19 +10,27 @@
 
 (def stage (.. js/process -env -serverlessStage))
 
-(def config {})
-
 (def table-names {:identities (.. js/process -env -identitiesTable)
+                  :identity   (.. js/process -env -identitiesTable)
                   :courses    (.. js/process -env -coursesTable)
                   :resources  (.. js/process -env -resourcesTable)
                   :bookmarks  (.. js/process -env -bookmarksTable)
                   :profiles   (.. js/process -env -profilesTable)})
 
-
 (def bucket-names {:github-courses (.. js/process -env -githubCoursesBucket)
                    :portraits      (.. js/process -env -assetsBucket)
                    :raw-resources  (.. js/process -env -resourcesBucket)
                    :github-repos   (.. js/process -env -githubReposBucket)})
+
+(def stream-names {:raw-users      (.. js/process -env -rawUsersStream)
+                   :courses        (.. js/process -env -coursesStream)
+                   :raw-resources  (.. js/process -env -rawResourcesStream)
+                   :github-repos   (.. js/process -env -githubReposStream)
+                   :github-courses (.. js/process -env -githubCoursesStream)})
+
+(def config {:table-names table-names
+             :bucket-names bucket-names
+             :stream-names stream-names})
 
 (defrecord Service []
   Actionable
@@ -52,8 +60,6 @@
   (map->Service (merge config
                        {:stage stage
                         :context (cv/to-clj context)
-                        :table-names table-names
-                        :bucket-names bucket-names
                         :event   (aws-event/create event)}
                         (initialize-adapters adapters stage))))
 

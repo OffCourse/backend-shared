@@ -53,5 +53,4 @@
     (to-item key bucket-name (cv/to-json resource))))
 
 (defmethod to-action [:put :raw-resources] [[_ resources] bucket-name]
-  (log/log "X" bucket-name)
   [:put (map #(to-resource-item %1 bucket-name) resources)])

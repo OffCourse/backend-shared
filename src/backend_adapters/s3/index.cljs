@@ -1,7 +1,8 @@
 (ns backend-adapters.s3.index
   (:require [backend-adapters.s3.fetch :refer [fetch]]
             [backend-adapters.s3.perform :refer [perform]]
-            [backend-adapters.s3.to-action :as s3]
+            [backend-adapters.s3.to-action :refer [to-action]]
+            [backend-adapters.s3.to-query :refer [to-query]]
             [cljs.nodejs :as node]
             [shared.models.action.index :as action]
             [shared.protocols.actionable :refer [Actionable]]
@@ -10,8 +11,9 @@
 
 (def AWS (node/require "aws-sdk"))
 
-(defn create [dev]
-  (specify! (new AWS.S3)
+(defn create [{:keys [table-names]}]
+  (specify! {:instance (new AWS.S3)
+             :table-names table-names}
     Queryable
     (-fetch [this query] (fetch this query))
     Actionable
@@ -19,5 +21,8 @@
 
 ;; This should be Action (still have to create a proper type for this...)
 (extend-protocol Convertible
+  PersistentArrayMap
+  (-to-bucket   [obj] (to-query obj))
   PersistentVector
-  (-to-bucket   [obj bucket-name] (->  obj action/create (s3/to-action bucket-name))))
+  (-to-bucket   [obj bucket-name] (->  obj action/create (to-action bucket-name))))
+

@@ -1,17 +1,17 @@
 (ns backend-adapters.dynamodb.to-action
-  (:require [cljs.nodejs :as node]
-            [shared.protocols.specced :as sp]
-            [clojure.walk :as walk]
-            [shared.protocols.loggable :as log]
-            [shared.models.action.index :as action]))
+  (:require [clojure.walk :as walk]
+            [shared.models.action.index :as action]
+            [shared.protocols.specced :as sp]))
 
-(defn create-item [table-name data]
-  {:table-name table-name
-   :item data})
+(defn replaceEmptyStrings [obj]
+  (walk/postwalk-replace {"" nil} obj))
 
-(defmulti to-action sp/resolve)
+(defn create-item [data table-name]
+  {:TableName table-name
+   :Item (-> data replaceEmptyStrings clj->js)})
 
-(defmethod to-action :default [[_ payload :as action] table-name]
-  (let [[action-type] (sp/resolve action)
-        items (map #(create-item table-name %1) payload)]
+(defn to-action [[_ payload :as action] table-names]
+  (let [[action-type payload-type] (sp/resolve action)
+        table-name (payload-type table-names)
+        items (map #(create-item %1 table-name) payload)]
     (action/create [action-type items])))
