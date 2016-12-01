@@ -5,7 +5,7 @@
             [shared.protocols.queryable :refer [Queryable]]
             [shared.protocols.convertible :as cv :refer [Convertible]]
             [shared.models.action.index :as action]
-            [backend-adapters.dynamodb.to-action :refer [to-action]]
+            [backend-adapters.dynamodb.to-payload :refer [to-payload]]
             [backend-adapters.dynamodb.to-query :refer [to-query]]
             [shared.protocols.actionable :refer [Actionable]]
             [shared.protocols.loggable :as log])
@@ -24,7 +24,7 @@
 (extend-protocol Convertible
   ;; This should be Action (still have to create a proper type for this...)
   PersistentVector
-  (-to-db       [obj table-names] (->  obj action/create (to-action table-names)))
+  (-to-db       [obj table-names] (to-payload obj table-names))
   ;; These should both be Query (still have to create a proper type for this...)
   PersistentHashMap
   (-to-db       [obj table-names] (to-query obj table-names))

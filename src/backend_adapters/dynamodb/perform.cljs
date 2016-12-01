@@ -1,6 +1,8 @@
 (ns backend-adapters.dynamodb.perform
   (:require [cljs.core.async :as async]
-            [shared.protocols.loggable :as log])
+            [shared.protocols.loggable :as log]
+            [shared.models.payload.index :as payload]
+            [shared.protocols.convertible :as cv])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn -save [{:keys [action] :as adapter} query]
@@ -17,11 +19,13 @@
              (async/close! c)))
     c))
 
-(defn perform [{:keys [table-names] :as this} [_ queries]]
+(defn perform [{:keys [table-names] :as this} [_ payload]]
   (go
-    (let [query-chans (async/merge (map #(-save this %) queries))
-          res         (async/<! (async/into [] query-chans))
-          errors      (filter (fn [[result data]] (= :error result)) res)]
+    (let [payload       (payload/create (into [] payload))
+          queries       (cv/to-db payload table-names)
+          payload-chans (async/merge (map #(-save this %) queries))
+          res           (async/<! (async/into [] payload-chans))
+          errors        (filter (fn [[result data]] (= :error result)) res)]
       (if (empty? errors)
         {:success true}
         {:error (map second errors)}))))

@@ -8,4 +8,7 @@
 
 (spec/def :raw/course ::course)
 
+(spec/def :raw/repo   (spec/keys :req-un [::name ::owner ::sha]
+                                 :opt-un [:base/user-name]))
+
 (spec/def :raw/user ::user)

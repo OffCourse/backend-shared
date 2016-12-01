@@ -10,3 +10,8 @@
 (spec/def :aws/event       (spec/or :auth   ::auth/event
                                     :stream ::stream/event
                                     :api    ::api/event))
+
+(spec/def ::item-key    string?)
+(spec/def ::bucket-name string?)
+(spec/def :aws/bucket-item     (spec/keys :req-un [::item-key
+                                                   ::bucket-name]))

@@ -7,9 +7,10 @@
 (spec/def ::type string?)
 (spec/def ::size int?)
 (spec/def ::sha string?)
-(spec/def ::path   string?)
+(spec/def ::path string?)
+(spec/def ::tree (spec/* map?))
 
-(spec/def :github/repo   (spec/keys :req-un [::name ::owner ::sha]
-                                    :opt-un [:base/user-name]))
+(spec/def :github/repo   (spec/keys :req-un [::name ::owner ::sha ::tree
+                                             :base/url :base/user-name]))
 
 (spec/def :github/course (spec/keys :req-un [::path ::sha :base/url :base/user-name]))
