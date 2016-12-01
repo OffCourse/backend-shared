@@ -13,5 +13,4 @@
 
 (spec/def ::item-key    string?)
 (spec/def ::bucket-name string?)
-(spec/def :aws/bucket-item     (spec/keys :req-un [::item-key
-                                                   ::bucket-name]))
+(spec/def :aws/bucket-item (spec/keys :req-un [::item-key ::bucket-name]))

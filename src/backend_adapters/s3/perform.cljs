@@ -19,19 +19,12 @@
                    (async/close! c)))
     c))
 
-(defn create-query [{:keys [item-key bucket-name item-data]}]
-  {:Bucket bucket-name
-   :Key item-key
-   :Body item-data})
-
 (defn perform [{:keys [bucket-names] :as this} [_ payload :as action]]
   (go
-    (let [payload     (payload/create (into [] payload))
-          queries     (cv/to-bucket payload bucket-names)
+    (let [queries     (cv/to-bucket (into [] payload) bucket-names)
           query-chans (async/merge (map #(put this %) queries))
           res         (async/<! (async/into [] query-chans))
           errors      (filter (fn [[result data]] (= :error result)) res)]
-      (log/log "X" (clj->js queries))
       (if (empty? errors)
         {:success queries}
         {:error (map second errors)}))))

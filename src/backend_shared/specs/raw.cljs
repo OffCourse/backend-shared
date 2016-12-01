@@ -12,3 +12,5 @@
                                  :opt-un [:base/user-name]))
 
 (spec/def :raw/user ::user)
+
+(spec/def :raw/github-course (spec/keys :req-un [::path ::sha :base/url :base/user-name]))

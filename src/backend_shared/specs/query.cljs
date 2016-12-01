@@ -5,7 +5,7 @@
 (spec/def :query/es (spec/keys :req-un [:es/query]))
 
 
-(spec/def :query/backend (spec/or :github-repos   (spec/coll-of :github/repo)
+(spec/def :query/backend (spec/or :raw-repos      (spec/coll-of :raw/repo)
                                   :github-courses (spec/coll-of :github/course)
                                   :bucket-items   (spec/coll-of :aws/bucket-item)
                                   :course         :query/course

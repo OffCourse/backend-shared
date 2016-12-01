@@ -26,13 +26,9 @@
                    (async/close! c)))
     c))
 
-(defn create-query [{:keys [bucket-name item-key]}]
-  {:Bucket bucket-name
-   :Key item-key})
-
 (defn fetch [{:keys [bucket-names] :as adapter} query]
   (go
-    (let [queries (map #(create-query %1) query)
+    (let [queries (map #(cv/to-bucket %1) query)
           query-chans (async/merge (map #(-get adapter %1) queries))
           merged-res  (async/<! (async/into [] query-chans))
           errors      (filter (fn [{:keys [error]}] error) merged-res)

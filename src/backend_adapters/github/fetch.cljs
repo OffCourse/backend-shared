@@ -66,7 +66,7 @@
           res         (set/join merged-res query {:sha :sha})]
       {:found res})))
 
-(defmethod fetch :github-repos [{:keys [endpoint] :as this} query]
+(defmethod fetch :raw-repos [{:keys [endpoint] :as this} query]
   (go
     (let [urls        (map #(tree-url endpoint %) query)
           query-chans (async/merge (map #(-fetch %) urls))
