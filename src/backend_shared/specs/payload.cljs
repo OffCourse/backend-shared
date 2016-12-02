@@ -16,6 +16,8 @@
                                     :errors             (spec/coll-of :offcourse/error)
                                     :course             :offcourse/course
                                     :raw-resource       :embedly/resource
+                                    :profile            :offcourse/profile
+                                    :course             :offcourse/course
                                     :raw-user           :raw/user
                                     :github-repo        :github/repo
                                     :github-course      :github/course

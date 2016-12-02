@@ -11,11 +11,11 @@
 (def creds (AWS.EnvironmentCredentials. "AWS"))
 (def HTTP (AWS.NodeHttpClient.))
 
-(defn create-request [endpoint index-name [id item]]
+(defn create-request [endpoint {:keys [id item index-name]}]
   (let [req (AWS.HttpRequest. endpoint)
         headers (aget req "headers")]
     (aset req "method" "POST")
-    (aset req "path"  (.join path "/" "offcourse" index-name id))
+    (aset req "path"  (.join path "/" "offcourse" (clj->js index-name) id))
     (aset req "region" "us-east-1")
     (aset headers "presigned-expires" false)
     (aset headers "Host" (aget endpoint "host"))
@@ -39,12 +39,13 @@
     (.handleRequest HTTP req nil #(handle-response %1 c))
     c))
 
-(defn perform [{:keys [endpoint] :as this} index-name [_ payload]]
+(defn perform [{:keys [endpoint index-names] :as this} [_ payload]]
   (go
-    (let [queries     (map #(create-request endpoint index-name %1) payload)
-          query-chans (async/merge (map #(-save %) queries))
+    (let [queries     (cv/to-search (into [] payload) index-names)
+          requests    (map #(create-request endpoint %1) queries)
+          query-chans (async/merge (map #(-save %) requests))
           merged-res  (async/<! (async/into [] query-chans))
           errors      (filter (fn [{:keys [error]}] error) merged-res)
-          success       (remove (fn [{:keys [error]}] error) merged-res)]
+          success     (remove (fn [{:keys [error]}] error) merged-res)]
       {:saved success
        :errors errors})))
