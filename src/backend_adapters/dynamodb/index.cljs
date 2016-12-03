@@ -14,7 +14,7 @@
 (def AWS (node/require "aws-sdk"))
 
 (defn create [{:keys [table-names]}]
-  (specify {:action (AWS.DynamoDB.DocumentClient.)
+  (specify {:instance (AWS.DynamoDB.DocumentClient.)
             :table-names  table-names}
     Queryable
     (-fetch [table query] (fetch table query))

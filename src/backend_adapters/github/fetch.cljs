@@ -11,22 +11,17 @@
 (defn yaml-file? [{:keys [path] :as ref}]
   (re-find #"\.yaml$" path))
 
-(defn to-js [obj]
-  (.parse js/JSON obj))
-
-(def api-key (.. js/process -env -githubApiKey))
+(defn to-js [obj] (.parse js/JSON obj))
 
 (def atob (node/require "atob"))
 (def yaml (node/require "js-yaml"))
-(def -request (node/require "request"))
+(def request (node/require "request"))
 
-(def authorized-header {:headers {:user-agent    "offcourse"
-                                  :authorization (str "token " api-key)}})
+(defn authorized-header [api-key]
+  {:user-agent    "offcourse"
+   :authorization (str "token " api-key)})
 
-(def unauthorized-header {:headers {:user-agent    "offcourse"}})
-
-(def request (.defaults -request
-                        (clj->js (if api-key authorized-header unauthorized-header))))
+(def unauthorized-header {:user-agent    "offcourse"})
 
 (defn tree-url [endpoint repository]
   (let [{:keys [owner name sha]} repository]
@@ -51,25 +46,27 @@
        js->clj
        walk/keywordize-keys))
 
-(defn -fetch [url]
+(defn -fetch [url api-key]
   (let [c (async/chan)]
-    (request (clj->js url) #(handle-response c %2 %3 %1))
+    (request (clj->js {:url url
+                       :headers (if api-key (authorized-header api-key) unauthorized-header)})
+             #(handle-response c %2 %3 %1))
     c))
 
 (defmulti fetch (fn [_ query] (sp/resolve query)))
 
-(defmethod fetch :github-courses [{:keys [endpoint] :as this} query]
+(defmethod fetch :raw-github-courses [{:keys [api-key endpoint] :as this} query]
   (go
     (let [urls        (map :url query)
-          query-chans (async/merge (map #(-fetch %) urls))
+          query-chans (async/merge (map #(-fetch % api-key) urls))
           merged-res  (async/<! (async/into [] query-chans))
           res         (set/join merged-res query {:sha :sha})]
       {:found res})))
 
-(defmethod fetch :raw-repos [{:keys [endpoint] :as this} query]
+(defmethod fetch :raw-repos [{:keys [api-key endpoint] :as this} query]
   (go
     (let [urls        (map #(tree-url endpoint %) query)
-          query-chans (async/merge (map #(-fetch %) urls))
+          query-chans (async/merge (map #(-fetch % api-key) urls))
           merged-res  (async/<! (async/into [] query-chans))
           errors      (filter (fn [{:keys [error]}] error) merged-res)
           res         (set/join merged-res query {:sha :sha})]

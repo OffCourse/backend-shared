@@ -19,7 +19,7 @@
                               #(async/close! c))))
     c))
 
-(defn -fetch [endpoint-url index-name query]
+(defn -fetch [endpoint-url {:keys [index-name query]}]
   (go
     (if endpoint-url
       (<! (request {:url  (str endpoint-url "/offcourse/" index-name "/_search")
@@ -33,9 +33,9 @@
        :hits :hits
        (mapv :_source)))
 
-(defn fetch [{:keys [url] :as this} index-name query]
+(defn fetch [{:keys [url] :as this} query]
   (go
-    (let [{:keys [error] :as res}      (async/<! (-fetch url index-name query))
+    (let [{:keys [error] :as res}      (async/<! (-fetch url (cv/to-search query)))
           items                        (when-not error (extract-items res))]
       {:error error
        :found items})))

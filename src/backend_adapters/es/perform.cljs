@@ -15,7 +15,7 @@
   (let [req (AWS.HttpRequest. endpoint)
         headers (aget req "headers")]
     (aset req "method" "POST")
-    (aset req "path"  (.join path "/" "offcourse" (clj->js index-name) id))
+    (aset req "path"  (.join path "/" "offcourse" (name index-name) id))
     (aset req "region" "us-east-1")
     (aset headers "presigned-expires" false)
     (aset headers "Host" (aget endpoint "host"))
@@ -39,9 +39,9 @@
     (.handleRequest HTTP req nil #(handle-response %1 c))
     c))
 
-(defn perform [{:keys [endpoint index-names] :as this} [_ payload]]
+(defn perform [{:keys [endpoint] :as this} [_ payload]]
   (go
-    (let [queries     (cv/to-search (into [] payload) index-names)
+    (let [queries     (cv/to-search (into [] payload))
           requests    (map #(create-request endpoint %1) queries)
           query-chans (async/merge (map #(-save %) requests))
           merged-res  (async/<! (async/into [] query-chans))

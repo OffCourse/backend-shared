@@ -9,17 +9,21 @@
 (defmulti to-query sp/resolve)
 
 (defmethod to-query :resource [{:keys [resource-url]}]
-  (query {:must [{:match {:resource-url resource-url}}]}))
+  {:index-name "resources"
+   :query (query {:must [{:match {:resource-url resource-url}}]})})
 
 (defmethod to-query :course [{:keys [course-slug curator]}]
-  (query {:must [{:match {:goal (str/humanize course-slug)}}
-                 {:match {:curator curator}}]}))
+  {:index-name "courses"
+   :query (query {:must [{:match {:goal (str/humanize course-slug)}}
+                         {:match {:curator curator}}]})})
 
 (defmethod to-query :collection [{:keys [collection-type collection-name]}]
   (if (= collection-name "all")
-    (query {})
+    {:index-name "courses"
+     :query (query {})}
     (let [query-key (case (keyword collection-type)
                       :flags :flags
                       :tags :checkpoints.tags
                       :curators :curator)]
-      (query {:should [{:match {query-key collection-name}}]}))))
+    {:index-name "resources"
+     :query (query {:should [{:match {query-key collection-name}}]})})))

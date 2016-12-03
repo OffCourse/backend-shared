@@ -48,8 +48,8 @@
   Queryable
   (-fetch [service query] (fetch/fetch service query)))
 
-(defn initialize-adapters [adapter-names stage]
-  (reduce (fn [acc val] (assoc acc val ((val adapters/constructors) config)))
+(defn initialize-adapters [adapter-names env]
+  (reduce (fn [acc val] (assoc acc val ((val adapters/constructors) env)))
           {} adapter-names))
 
 (defn log-incoming [event context]
@@ -63,25 +63,15 @@
   (log/log "---------------")
   (log/log ""))
 
-(defn initialize [{:keys [specs mappings event context adapters] :as config}]
+(defn initialize [{:keys [specs mappings callback event context environment adapters] :as config}]
   (specs)
   (mappings)
   (log-incoming event context)
-  (map->Service (merge config
-                       {:stage stage
+  (map->Service (merge {:stage stage
+                        :callback callback
                         :context (cv/to-clj context)
                         :event   (aws-event/create event)}
-                        (initialize-adapters adapters stage))))
-
-(defn create [name cb adapter-names mappings specs]
-  (do
-    (specs)
-    (mappings)
-    (map->Service (merge {:service-name name
-                          :stage        stage
-                          :callback     cb}
-                         (initialize-adapters adapter-names stage)))))
-
+                        (initialize-adapters adapters environment))))
 
 (defn res [code body] {:statusCode code
                            :headers {:Access-Control-Allow-Origin "*"}
@@ -93,7 +83,8 @@
 
 (defn unauthorized [{:keys [callback]} error] (callback (str "[401] " error)))
 
-(defn done [{:keys [callback]} payload] (callback nil (clj->js payload)))
+(defn done [{:keys [callback] :as s} payload] (callback nil (clj->js payload)))
+
 (defn fail [{:keys [callback]} error] (callback (clj->js error)) nil)
 
 (def fetch fetch/fetch)

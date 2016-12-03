@@ -11,10 +11,11 @@
                                     :raw-users          (spec/coll-of :raw/user)
                                     :resources          (spec/coll-of :offcourse/resource)
                                     :profiles           (spec/coll-of :offcourse/profile)
-                                    :portraits          (spec/coll-of :offcourse/portrait)
+                                    :raw-portraits      (spec/coll-of :offcourse/portrait)
                                     :identities         (spec/coll-of :offcourse/identity)
                                     :errors             (spec/coll-of :offcourse/error)
                                     :course             :offcourse/course
+                                    :resource           :offcourse/resource
                                     :raw-resource       :embedly/resource
                                     :profile            :offcourse/profile
                                     :course             :offcourse/course

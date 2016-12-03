@@ -9,21 +9,19 @@
             [shared.protocols.queryable :refer [Queryable]]))
 
 (def AWS (node/require "aws-sdk"))
-(def endpoint-url (.. js/process -env -elasticsearchEndpoint))
-(def endpoint (when endpoint-url (AWS.Endpoint. endpoint-url)))
 
-(defn create [{:keys [index-names]}]
+(defn create [{:keys [index-names search-url]}]
   (specify! {:name "elasticsearch"
-             :endpoint endpoint
-             :index-names index-names
-             :url endpoint-url}
+             :endpoint-url search-url
+             :endpoint (when search-url (AWS.Endpoint. search-url))
+             :url search-url}
     Queryable
-    (-fetch [this index-name query] (fetch this index-name query))
+    (-fetch [this query] (fetch this query))
     Actionable
     (-perform [this action] (perform this action))))
 
 (extend-protocol Convertible
   PersistentArrayMap
-  (-to-search [obj index-names] (to-query obj index-names))
+  (-to-search [obj] (to-query obj))
   PersistentVector
-  (-to-search [obj index-names] (to-payload obj index-names)))
+  (-to-search [obj] (to-payload obj)))

@@ -3,10 +3,8 @@
             [backend-adapters.embedly.fetch :refer [fetch]]
             [shared.protocols.loggable :as log]))
 
-(def api-key (.. js/process -env -embedlyApiKey))
-
-(defn create [stage]
-  (specify {:api-key (js->clj api-key)
+(defn create [{:keys [api-keys] :as stage}]
+  (specify {:api-key (:embedly api-keys)
             :api-version "1"
             :stage stage
             :endpoint "http://api.embed.ly"}

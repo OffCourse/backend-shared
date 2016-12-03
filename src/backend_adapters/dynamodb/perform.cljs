@@ -5,12 +5,12 @@
             [shared.protocols.convertible :as cv])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(defn -save [{:keys [action] :as adapter} query]
+(defn -save [{:keys [instance] :as adapter} query]
   (let [c (async/chan)]
-    (.put action (clj->js query)
+    (.put instance (clj->js query)
           #(let [response (if %1
                             (do
-                              (log/log "ERROR: " %1)
+                              (log/log "ERROR: " (.stringify js/JSON %1))
                               [:error query])
                             [:success %2])]
              (when (= :error response)

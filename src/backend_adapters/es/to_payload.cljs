@@ -20,6 +20,6 @@
    :item item
    :index-name index-name})
 
-(defn to-payload [payload _]
+(defn to-payload [payload]
   (let [index-name (sp/resolve (payload/create payload))]
     (map #(to-item %1 index-name) payload)))
