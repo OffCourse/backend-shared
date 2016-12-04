@@ -4,7 +4,9 @@
             [shared.protocols.loggable :as log]))
 
 (defn query [subquery]
-  {:query {:bool subquery}})
+  {:from 0
+   :size 40
+   :query {:bool subquery}})
 
 (defmulti to-query sp/resolve)
 

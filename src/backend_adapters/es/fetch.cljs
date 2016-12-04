@@ -31,7 +31,8 @@
        to-js
        cv/to-clj
        :hits :hits
-       (mapv :_source)))
+       (mapv :_source)
+       (remove (fn [{:keys [query]}] query))))
 
 (defn fetch [{:keys [url] :as this} query]
   (go
