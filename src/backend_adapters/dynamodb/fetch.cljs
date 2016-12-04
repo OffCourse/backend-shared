@@ -18,8 +18,8 @@
   (async/put! channel (response-params error data query))
   (async/close! channel))
 
-(defn fetch [{:keys [action table-names] :as adapter} query]
+(defn fetch [{:keys [instance table-names] :as adapter} query]
   (let [c (async/chan)
         query (cv/to-db query table-names)]
-    (.get action (clj->js query) #(handle-response c %1 %2 query))
+    (.get instance (clj->js query) #(handle-response c %1 %2 query))
     c))

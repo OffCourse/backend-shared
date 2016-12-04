@@ -10,6 +10,6 @@
 
 (spec/def :offcourse/action  :action/valid)
 (spec/def :offcourse/query   :query/backend)
-(spec/def :offcourse/payload :payload/backend)
+#_(spec/def :offcourse/payload :payload/backend)
 
 

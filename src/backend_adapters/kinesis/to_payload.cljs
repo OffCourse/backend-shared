@@ -9,6 +9,5 @@
 (defn to-payload [records stream-names]
   (let [payload-type (sp/resolve records)
         stream-name (payload-type stream-names)]
-    (log/log "X" payload-type)
     {:StreamName stream-name
      :Records (map create-record records)}))

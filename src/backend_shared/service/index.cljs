@@ -6,51 +6,8 @@
             [shared.protocols.actionable :refer [Actionable]]
             [shared.protocols.convertible :as cv]
             [shared.protocols.loggable :as log]
-            [shared.protocols.queryable :refer [Queryable]]))
-
-(def stage (.. js/process -env -serverlessStage))
-
-(def table-names  {:identities         (.. js/process -env -identitiesTable)
-                   :identity           (.. js/process -env -identitiesTable)
-                   :courses            (.. js/process -env -coursesTable)
-                   :resources          (.. js/process -env -resourcesTable)
-                   :bookmarks          (.. js/process -env -bookmarksTable)
-                   :profiles           (.. js/process -env -profilesTable)})
-
-(def bucket-names {:github-courses     (.. js/process -env -githubCoursesBucket)
-                   :portraits          (.. js/process -env -assetsBucket)
-                   :raw-resources      (.. js/process -env -resourcesBucket)
-                   :courses            (.. js/process -env -rawCoursesBucket)
-                   :raw-users          (.. js/process -env -rawUsersBucket)
-                   :github-repos       (.. js/process -env -githubReposBucket)})
-
-(def stream-names {:raw-users          (.. js/process -env -rawUsersStream)
-                   :bookmarks          (.. js/process -env -bookmarksStream)
-                   :courses            (.. js/process -env -coursesStream)
-                   :raw-resources      (.. js/process -env -rawResourcesStream)
-                   :raw-portraits      (.. js/process -env -rawPortraitsStream)
-                   :resources          (.. js/process -env -resourcesStream)
-                   :identities         (.. js/process -env -identitiesStream)
-                   :errors             (.. js/process -env -errorsStream)
-                   :profiles           (.. js/process -env -profilesStream)
-                   :raw-repos          (.. js/process -env -rawReposStream)
-                   :github-repos       (.. js/process -env -githubReposStream)
-                   :raw-github-courses (.. js/process -env -rawGithubCoursesStream)
-                   :github-courses     (.. js/process -env -githubCoursesStream)})
-
-(def config {:table-names table-names
-             :bucket-names bucket-names
-             :stream-names stream-names})
-
-(defrecord Service []
-  Actionable
-  (-perform [service payload] (perform/perform service payload))
-  Queryable
-  (-fetch [service query] (fetch/fetch service query)))
-
-(defn initialize-adapters [adapter-names env]
-  (reduce (fn [acc val] (assoc acc val ((val adapters/constructors) env)))
-          {} adapter-names))
+            [shared.protocols.queryable :refer [Queryable]]
+            [clojure.walk :as walk]))
 
 (defn log-incoming [event context]
   (log/log "")
@@ -63,19 +20,39 @@
   (log/log "---------------")
   (log/log ""))
 
-(defn initialize [{:keys [specs mappings callback event context environment adapters] :as config}]
+(defrecord Service []
+  Actionable
+  (-perform [service payload] (perform/perform service payload))
+  Queryable
+  (-fetch [service query] (fetch/fetch service query)))
+
+(defn initialize [{:keys [specs mappings callback event context environment adapters] :as config}])
+
+;; error handling needs to be much better here
+
+(defn check [[key val]] (if-not val key (when (map? val) (keep check val))))
+
+(defn create-adapters [adapters cb]
+  (reduce (fn [acc [adapter-name config]]
+            (let [errors (flatten (keep check config))]
+              (if-not (empty? errors)
+                (cb (clj->js (map #(str "envvar for " (name %) " not set") errors)) nil)
+                (assoc acc adapter-name ((adapter-name adapters/constructors) config)))))
+            {} adapters))
+
+(defn create [specs mappings adapters event context callback]
   (specs)
   (mappings)
   (log-incoming event context)
-  (map->Service (merge {:stage stage
+  (map->Service (merge {:stage (.. js/process -env -serverlessStage)
                         :callback callback
                         :context (cv/to-clj context)
                         :event   (aws-event/create event)}
-                        (initialize-adapters adapters environment))))
+                       (create-adapters adapters callback))))
 
 (defn res [code body] {:statusCode code
-                           :headers {:Access-Control-Allow-Origin "*"}
-                           :body body})
+                       :headers {:Access-Control-Allow-Origin "*"}
+                       :body body})
 
 (defn accepted
   ([{:keys [callback]}] (callback nil (clj->js (res 202 nil))))
