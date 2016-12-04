@@ -9,7 +9,7 @@
             [backend-shared.specs.embedly]))
 
 (spec/def :offcourse/action  :action/valid)
-(spec/def :offcourse/query   :query/backend)
+#_(spec/def :offcourse/query   :query/backend)
 #_(spec/def :offcourse/payload :payload/backend)
 
 

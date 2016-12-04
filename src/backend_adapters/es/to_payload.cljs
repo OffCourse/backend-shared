@@ -3,19 +3,19 @@
             [shared.protocols.loggable :as log]
             [shared.models.payload.index :as payload]))
 
-(defmulti to-item (fn [item index-name] (sp/resolve (payload/create item))))
+(defmulti to-item (fn [item index-name] index-name))
 
-(defmethod to-item :resource [{:keys [resource-url] :as item} index-name]
+(defmethod to-item :resources [{:keys [resource-url] :as item} index-name]
   {:id resource-url
    :item item
    :index-name index-name})
 
-(defmethod to-item :course [{:keys [course-id] :as item} index-name]
+(defmethod to-item :courses [{:keys [course-id] :as item} index-name]
   {:id course-id
    :item item
    :index-name index-name})
 
-(defmethod to-item :profile [{:keys [user-name] :as item} index-name]
+(defmethod to-item :profiles[{:keys [user-name] :as item} index-name]
   {:id user-name
    :item item
    :index-name index-name})

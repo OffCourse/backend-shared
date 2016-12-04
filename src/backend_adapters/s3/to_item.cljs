@@ -22,7 +22,7 @@
   (let [key (str (-> url (str/replace #"[:&@/,<>`']" "-") (str "/embedly")))]
     (create-item key bucket-name (cv/to-json resource))))
 
-(defmethod to-item :course [course _ bucket-name]
+(defmethod to-item :courses [course _ bucket-name]
   (create-item (str (.now js/Date)) bucket-name (cv/to-json course)))
 
 (defmethod to-item :raw-users [{:keys [user-name] :as user} _ bucket-name]
