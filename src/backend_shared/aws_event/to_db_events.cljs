@@ -9,6 +9,7 @@
 (defn extract-event [{:keys [eventName dynamodb]}]
   (case eventName
     "REMOVE" [:removed dynamodb]
+    "MODIFY" [:added (-> dynamodb :NewImage clj->js unmarshal-item cv/to-clj)]
     "INSERT" [:added (-> dynamodb :NewImage clj->js unmarshal-item cv/to-clj)]))
 
 (defn group-db-event [acc record]
