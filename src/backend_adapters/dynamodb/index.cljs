@@ -23,8 +23,11 @@
 
 (extend-protocol Convertible
   ;; This should be Action (still have to create a proper type for this...)
+  List
+  (-to-db       [obj table-names] (to-query obj table-names))
   PersistentVector
   (-to-db       [obj table-names] (to-payload obj table-names))
+
   ;; These should both be Query (still have to create a proper type for this...)
   PersistentHashMap
   (-to-db       [obj table-names] (to-query obj table-names))
