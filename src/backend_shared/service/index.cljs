@@ -43,7 +43,7 @@
 (defn create [specs mappings adapters event context callback]
   (specs)
   (mappings)
-  (log-incoming event context)
+  #_(log-incoming event context)
   (map->Service (merge {:stage (.. js/process -env -serverlessStage)
                         :callback callback
                         :context (cv/to-clj context)

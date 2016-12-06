@@ -6,7 +6,8 @@
             [cljs.spec :as spec]
             [backend-adapters.dynamodb.to-query :refer [to-query]]
             [shared.protocols.loggable :as log]
-            [shared.protocols.specced :as sp]))
+            [shared.protocols.specced :as sp])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn response-params [error data {:keys [Count] :as query}]
   (let [data (cv/to-clj data)]
@@ -21,8 +22,24 @@
   (async/put! channel (response-params error data query))
   (async/close! channel))
 
-(defn fetch [{:keys [instance table-names] :as adapter} query]
-  (let [c (async/chan)
-        query (to-query query table-names)]
+(spec/def ::single-or-multiple (spec/or :single map?
+                                        :multiple (spec/coll-of map?)))
+
+(defn exec-query [instance query]
+  (let [c (async/chan)]
     (.query instance (clj->js query) #(handle-response c %1 %2 query))
     c))
+
+(defmulti fetch (fn [_ query] (first (spec/conform ::single-or-multiple query))))
+
+(defmethod fetch :single [{:keys [instance table-names] :as adapter} query]
+  (let [query (to-query query table-names)]
+    (exec-query instance query)))
+
+(defmethod fetch :multiple [{:keys [instance table-names] :as adapter} query]
+  (go
+    (let [queries (to-query query table-names)
+          query-chans (async/merge (map #(exec-query instance %1) queries))
+          res (async/<! (async/into [] query-chans))]
+      {:found (flatten (keep :found res))
+       :errors (flatten (keep :error res))})))
