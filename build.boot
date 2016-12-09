@@ -17,7 +17,7 @@
                   [funcool/cuerdas             "0.8.0"]
                   [com.rpl/specter             "0.12.0"]
                   [org.clojure/clojure         "1.9.0-alpha10"]
-                  [offcourse/shared            "0.5.6"]
+                  [offcourse/shared            "0.5.7"]
                   [org.clojure/core.async      "0.2.385"]
                   [org.clojure/test.check      "0.9.0"]
                   [org.clojure/clojurescript   "1.9.216"]])
