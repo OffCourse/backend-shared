@@ -1,5 +1,7 @@
 (ns backend-shared.service.index
   (:require [backend-shared.aws-event.index :as aws-event]
+            [backend-shared.specs.index]
+            [backend-shared.protocol-extensions.index]
             [backend-adapters.index :as adapters]
             [backend-shared.service.fetch :as fetch]
             [backend-shared.service.perform :as perform]
@@ -46,7 +48,7 @@
   (log-incoming event context)
   (map->Service (merge {:stage (.. js/process -env -serverlessStage)
                         :callback callback
-                        :context (cv/to-clj context)
+                        :context (when context (cv/to-clj context))
                         :event   (aws-event/create event)}
                        (create-adapters adapters callback))))
 
