@@ -42,13 +42,21 @@
                 (assoc acc adapter-name ((adapter-name adapters/constructors) config)))))
             {} adapters))
 
-(defn create [specs mappings adapters event context callback]
+(defn create [adapters event context callback]
+  (log-incoming event context)
+  (map->Service (merge {:stage (.. js/process -env -serverlessStage)
+                        :callback callback
+                        :context (cv/to-clj context)
+                        :event   (aws-event/create event)}
+                       (create-adapters adapters callback))))
+
+#_(defn create [specs mappings adapters event context callback]
   (specs)
   (mappings)
   (log-incoming event context)
   (map->Service (merge {:stage (.. js/process -env -serverlessStage)
                         :callback callback
-                        :context (when context (cv/to-clj context))
+                        :context (cv/to-clj context)
                         :event   (aws-event/create event)}
                        (create-adapters adapters callback))))
 

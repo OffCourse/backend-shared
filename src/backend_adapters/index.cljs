@@ -7,15 +7,16 @@
             [backend-adapters.http.index :as http]
             [backend-adapters.iam.index :as iam]
             [backend-adapters.kinesis.index :as kinesis]
-            [backend-adapters.s3.index :as s3]))
+            [backend-adapters.s3.index :as s3]
+            [backend-adapters.code-pipeline.index :as code-pipeline]))
 
-
-(def constructors {:db        #(dynamodb/create %)
-                   :http      #(http/create %)
-                   :embedly   #(embedly/create %)
-                   :auth      #(auth0/create %)
-                   :iam       #(iam/create %)
-                   :index     #(es/create %)
-                   :github    #(github/create %)
-                   :bucket    #(s3/create %)
-                   :stream    #(kinesis/create %)})
+(def constructors {:db            #(dynamodb/create %)
+                   :code-pipeline #(code-pipeline/create %)
+                   :http          #(http/create %)
+                   :embedly       #(embedly/create %)
+                   :auth          #(auth0/create %)
+                   :iam           #(iam/create %)
+                   :index         #(es/create %)
+                   :github        #(github/create %)
+                   :bucket        #(s3/create %)
+                   :stream        #(kinesis/create %)})

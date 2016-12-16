@@ -33,6 +33,9 @@
 
 (defmulti to-payload (fn [aws-event] (sp/resolve aws-event)))
 
+(defmethod to-payload :code-pipeline [event]
+  {:jobId (-> event :CodePipeline.job :id)})
+
 (defmethod to-payload :auth [{:keys [methodArn authorizationToken]}]
   {:auth-token authorizationToken
    :method-arn methodArn})
