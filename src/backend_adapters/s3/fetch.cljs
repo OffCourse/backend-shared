@@ -5,9 +5,11 @@
             [shared.protocols.convertible :as cv])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
+
 (defn convert-payload [{:keys [Body] :as event}]
-  (log/log "XL" (clj->js (js/Buffer. Body)))
-  (.parse js/JSON (-> event :Body)))
+  (if (.isBuffer js/Buffer Body)
+    (keys event)
+    (.parse js/JSON (-> event :Body))))
 
 (defn to-payload [event]
   (-> event
