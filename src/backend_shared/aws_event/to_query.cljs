@@ -24,19 +24,16 @@
 (defmethod to-query :api [event]
   (-> event :body query/create))
 
-(defn extract-secure-item [{:keys [location revision]} credentials]
+(defn extract-secure-item [{:keys [location revision]}]
   {:item-key (-> location :s3Location :objectKey)
    :bucket-name (-> location :s3Location :bucketName)
-   :revision revision
-   :credentials credentials})
-
-(defn extract-secure-items [artifacts credentials]
-  (map #(extract-secure-item %1 credentials) artifacts))
+   :revision revision})
 
 (defmethod to-query :code-pipeline [event]
   (let [{:keys [inputArtifacts outputArtifacts artifactCredentials]} (-> event :CodePipeline.job :data)]
-    {:input-queries (extract-secure-items inputArtifacts artifactCredentials)
-     :output-queries (extract-secure-items outputArtifacts artifactCredentials)}))
+    {:input-queries (map extract-secure-item inputArtifacts)
+     :output-queries (map extract-secure-item outputArtifacts)
+     :credentials artifactCredentials}))
 
 (defmethod to-query :stream [event]
   (->> event

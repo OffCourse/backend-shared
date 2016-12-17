@@ -5,7 +5,8 @@
             [shared.protocols.convertible :as cv])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(defn convert-payload [event]
+(defn convert-payload [{:keys [Body] :as event}]
+  (log/log "XL" (clj->js (js/Buffer. Body)))
   (.parse js/JSON (-> event :Body)))
 
 (defn to-payload [event]
@@ -26,12 +27,16 @@
                    (async/close! c)))
     c))
 
-(defn fetch [{:keys [bucket-names] :as adapter} query]
-  (go
-    (let [queries (map #(cv/to-bucket %1) query)
-          query-chans (async/merge (map #(-get adapter %1) queries))
-          merged-res  (async/<! (async/into [] query-chans))
-          errors      (filter (fn [{:keys [error]}] error) merged-res)
-          found       (remove (fn [{:keys [error]}] error) merged-res)]
-      {:found found
-       :errors errors})))
+(defn fetch
+  ([adapter query]
+   (go
+     (let [queries (map #(cv/to-bucket %1) query)
+           query-chans (async/merge (map #(-get adapter %1) queries))
+           merged-res  (async/<! (async/into [] query-chans))
+           errors      (filter (fn [{:keys [error]}] error) merged-res)
+           found       (remove (fn [{:keys [error]}] error) merged-res)]
+       {:found found
+        :errors errors})))
+   ([{:keys [instance] :as adapter} credentials query]
+    (.update instance.config (clj->js (assoc credentials :signatureVersion "v4")))
+    (fetch adapter query)))

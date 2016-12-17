@@ -16,7 +16,9 @@
   (specify! {:instance (new AWS.S3)
              :bucket-names bucket-names}
     Queryable
-    (-fetch [this query] (fetch this query))
+    (-fetch
+      ([this query] (fetch this query))
+      ([this credentials query] (fetch this credentials query)))
     Actionable
     (-perform [this action] (perform this action))))
 
