@@ -6,12 +6,16 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def Unzip (node/require "jszip"))
+(def fs (node/require "fs"))
 
 (defn convert-payload [{:keys [Body] :as event}]
-  (let [c (async/chan)]
+  (let [c (async/chan)
+        filename "artifacts.zip"]
     (if (.isBuffer js/Buffer Body)
-      (do
-        (.then (.loadAsync Unzip Body) #(async/put! c (cv/to-clj %1))))
+      (let [stream (.createWriteStream fs filename)]
+        (.on stream "finish" #(async/put! c {:filename filename}))
+        (.write stream Body)
+        (.end stream))
       (async/put! c (cv/to-clj (.parse js/JSON (-> event :Body)))))
     c))
 
