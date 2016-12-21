@@ -25,6 +25,8 @@
           query-chans (async/merge (map #(put this %) queries))
           res         (async/<! (async/into [] query-chans))
           errors      (filter (fn [[result data]] (= :error result)) res)]
+      (log/log "X" (clj->js queries))
+      (log/log "X" (clj->js res))
       (if (empty? errors)
         {:success queries}
         {:error (map second errors)}))))

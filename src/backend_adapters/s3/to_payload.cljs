@@ -1,7 +1,8 @@
 (ns backend-adapters.s3.to-payload
   (:require [backend-adapters.s3.to-item :refer [to-item]]
             [shared.protocols.specced :as sp]
-            [shared.models.payload.index :as payload]))
+            [shared.models.payload.index :as payload]
+            [shared.protocols.loggable :as log]))
 
 (defn to-payload [payload bucket-names]
   (let [payload-type (sp/resolve (payload/create payload))

@@ -11,6 +11,9 @@
 
 (defmulti to-item (fn [payload payload-type bucket-name] payload-type))
 
+(defmethod to-item :files [{:keys [file-name content]} _ bucket-name]
+  (create-item file-name bucket-name content))
+
 (defmethod to-item :github-repos [{:keys [name sha user-name] :as repo} _ bucket-name]
   (create-item (str user-name "/" sha) bucket-name (cv/to-json repo)))
 

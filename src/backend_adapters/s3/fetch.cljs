@@ -10,7 +10,7 @@
 
 (defn convert-payload [{:keys [Body] :as event}]
   (let [c (async/chan)
-        filename "artifacts.zip"]
+        filename "/tmp/artifacts.zip"]
     (if (.isBuffer js/Buffer Body)
       (let [stream (.createWriteStream fs filename)]
         (.on stream "finish" #(async/put! c {:filename filename}))
